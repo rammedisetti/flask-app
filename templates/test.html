@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-to-Image Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        img {
+            max-width: 100%;
+            margin-top: 20px;
+        }
+        .message {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Text-to-Image Generator</h1>
+    <form id="text-to-image-form">
+        <label for="prompt">Enter a text prompt:</label><br>
+        <input type="text" id="prompt" name="prompt" required>
+        <button type="submit">Generate Image</button>
+    </form>
+    <div class="message" id="message"></div>
+    <img id="generated-image" alt="Generated Image will appear here">
+    <script>
+        document.getElementById('text-to-image-form').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent form submission
+            
+            const prompt = document.getElementById('prompt').value;
+            const messageDiv = document.getElementById('message');
+            const imageElement = document.getElementById('generated-image');
+            
+            messageDiv.textContent = "Generating image... Please wait.";
+            imageElement.src = ""; // Clear the previous image
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/generate-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    messageDiv.textContent = result.message;
+                    imageElement.src = result.image_path; // Set image path to display it
+                } else {
+                    messageDiv.textContent = "Error: " + result.error;
+                }
+            } catch (error) {
+                messageDiv.textContent = "Error connecting to the API.";
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>
